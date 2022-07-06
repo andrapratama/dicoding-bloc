@@ -1,5 +1,6 @@
 import 'package:counter_bloc/bloc/counter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: BlocProvider<CounterBloc>(
+        create: (_) => CounterBloc(),
+        child: const MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }
@@ -38,9 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: StreamBuilder(
-        stream: counterBloc.counterStream,
-        builder: (context, snapshot) {
+      body: BlocBuilder<CounterBloc, CounterState>(
+        builder: (context, state) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   'You have pushed the button this many times:',
                 ),
                 Text(
-                  '${snapshot.data}',
+                  '${state.value}',
                   style: Theme.of(context).textTheme.headline4,
                 ),
               ],
@@ -62,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           FloatingActionButton(
             onPressed: () {
-              counterBloc.eventSink.add(CounterEvent.decrement);
+              context.read<CounterBloc>().add(Decrement());
             },
             tooltip: 'Decrement',
             child: const Icon(Icons.remove),
@@ -70,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
           const SizedBox(width: 8),
           FloatingActionButton(
             onPressed: () {
-              counterBloc.eventSink.add(CounterEvent.increment);
+              context.read<CounterBloc>().add(Increment());
             },
             tooltip: 'Increment',
             child: const Icon(Icons.add),
@@ -82,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    counterBloc.dispose();
     super.dispose();
   }
 }
